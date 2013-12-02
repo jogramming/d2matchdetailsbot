@@ -1,0 +1,26 @@
+{{if equals (len .) 1}}Hello, I noticed you mentioned a match in your post. Here are some details about that match:
+{{else}}Hello, I noticed you mentioned some matches in your post. Here are some details about those matches:
+{{end}}
+{{range $i, $match := .}}
+{{if not (equals $i 0)}}---{{end}}
+Match id: [{{$match.Match_id}}](http://dotabuff.com/matches/{{$match.Match_id}}) {{if and $match.Dire_name $match.Radiant_name}}{{$match.Radiant_name}} VS {{$match.Dire_name}}{{end}}
+{{if $match.Radiant_win}}
+[Radiant](/spoiler) victory.
+{{else}}
+[Dire___](/spoiler) victory. 
+{{end}} Match duration: [{{FormatDuration $match.Duration}}](/spoiler) Gamemode: {{$match.Game_mode_str}}
+
+Radiant{{if $match.Radiant_name}}: {{$match.Radiant_name}}{{end}}
+
+Name|Hero|Level|K|D|A|Lasthits|Denies|GPM|XPM
+:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---:
+{{range $index, $element := $match.Players}}{{$element.Persona_name}}|{{heroname $element.Hero_id}}|{{$element.Level}}|{{$element.Kills}}|{{$element.Deaths}}|{{$element.Assists}}|{{$element.Last_hits}}|{{$element.Denies}}|{{$element.Gold_per_min}}|{{$element.Xp_per_min}}
+{{if equals $index 4}}
+
+Dire{{if $match.Dire_name}}: {{$match.Dire_name}}{{end}}
+
+Name|Hero|Level|K|D|A|Lasthits|Denies|GPM|XPM
+:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|---:
+{{end}}{{end}}{{end}}
+
+If you have any issues with this bot, suggestions or anything else pm /u/jonas747 (with permalink to comment if there was an issue)
