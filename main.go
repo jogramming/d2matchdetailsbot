@@ -268,6 +268,9 @@ func CheckContainsMatchId(comment string) []string {
 
 			}
 			if numString != "" {
+				if stringInSlice(numString, results) {
+					continue
+				}
 				results = append(results, numString)
 				lower = lower[found+len(word):]
 				continue
@@ -295,6 +298,9 @@ func CheckContainsMatchId(comment string) []string {
 			if numString == "" {
 				break
 			} else {
+				if stringInSlice(numString, results) {
+					continue
+				}
 				lower = lower[found+len(word):]
 				results = append(results, numString)
 			}
@@ -317,4 +323,13 @@ func stringContainOneOf(str string, contains []string) (int, string) {
 		}
 	}
 	return lowestIndex, lowestWord
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }
