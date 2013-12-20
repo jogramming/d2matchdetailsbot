@@ -241,7 +241,7 @@ func CheckContainsMatchId(comment string) []string {
 	wordmatches := []string{"matchid", "match-id", "match id", "dotabuff.com/matches/"}
 	results := make([]string, 0, 0)
 	for {
-		if len(results) > 5 {
+		if len(results) > 4 {
 			break
 		}
 		found, word := stringContainOneOf(lower, wordmatches)
