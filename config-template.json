@@ -1,6 +1,6 @@
 {
-	"RUser": "",
-	"RPass": "",
-	"RSub": "",
-	"D2Key": ""
+	"RUser": "redditusername",
+	"RPass": "reddutpassword",
+	"RSub": "redditsubreddit",
+	"D2Key": "steam web api key"
 }
