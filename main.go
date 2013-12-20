@@ -107,6 +107,7 @@ func PostMatchDetails(parent string, matches []string, account reddit.Account) e
 			for _, psum := range playersums {
 				if psum.Steamid == realid {
 					name = "[" + psum.Personaname + "](http://steamcommunity.com/profiles/" + realid + ")"
+					name += "([DB](http://dotabuff.com/search?q=" + realid + "))"
 					break
 				}
 			}
