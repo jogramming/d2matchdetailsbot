@@ -98,7 +98,7 @@ var GameModes = []string{
 	"Least Played",
 	"Limited Heroes",
 	"Compendium",
-	"Unknown",
+	"Custom",
 	"Captain's Draft",
 }
 
