@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// colors, pretty colors for terminal
 const (
 	HEADER  = "\033[95m"
 	OKBLUE  = "\033[94m"
@@ -30,6 +31,9 @@ var (
 	commentTemplate *template.Template
 
 	checkdeComments list.List
+
+	incrCheckedComment chan int
+	incrFoundId        chan int
 )
 
 func main() {
@@ -61,7 +65,7 @@ func main() {
 
 	funcMap := template.FuncMap{
 		// The name "title" is what the function will be called in the template text.
-		"equals":         Equals,
+		"equals":         func(a, b int) bool { return a == b },
 		"heroname":       GetHeroName,
 		"FormatDuration": FormatDuration,
 	}
@@ -112,6 +116,8 @@ func PostMatchDetails(parent string, matches []string, account reddit.Account) e
 				}
 			}
 
+			// Items used to be included in the format item1, item2, items3 etc..
+			// didn't look very good so i removed it
 			details.Players[i].Persona_name = strings.Replace(name, "|", " ", -1)
 
 			if details.Players[i].Item_0 != 0 {
@@ -148,9 +154,6 @@ func PostMatchDetails(parent string, matches []string, account reddit.Account) e
 	return nil
 }
 
-func Equals(a, b int) bool {
-	return a == b
-}
 func GetHeroName(id int) string {
 	return heroListing.Get(id)
 }
@@ -176,14 +179,10 @@ func StartStream() {
 		RAccount:      rAccount,
 	}
 	go cStream.Run()
-	ticker := time.NewTicker(time.Duration(10) * time.Minute)
-	numFound := 0
-	numProcessed := 0
 	for {
 		select {
 		case comment := <-cStream.Update:
-			if checkIfCommentChecked(comment.FullName) || comment.Author == rAccount.Username || comment.Author == "jonas747_bot" {
-
+			if checkIfCommentChecked(comment.FullName) || comment.Author == rAccount.Username {
 				continue
 			}
 			addCheckedComment(comment.FullName)
@@ -192,25 +191,38 @@ func StartStream() {
 				for _, id := range ids {
 					log.Println(ENDC + "Found match id: " + id)
 					log.Println(ENDC + "In: " + comment.Body)
-					numFound++
+					incrFoundId <- 1
 				}
 				PostMatchDetails(comment.FullName, ids, *rAccount)
 			}
-			numProcessed++
+			incrCheckedComment <- 1
 		case err := <-cStream.Errors:
 			if err == reddit.ERRCOMMENTSVOID {
 				log.Println(FAIL + "Comment void, restarting stream" + ENDC)
-				ticker.Stop()
 				return
 			}
 			log.Println(FAIL + err.Error() + ENDC)
-		case <-ticker.C:
-			log.Printf(ENDC+"Processed %d comments, found %d matches the last 10 minutes", numProcessed, numFound)
-			numFound = 0
-			numProcessed = 0
 		}
 	}
 
+}
+
+func statTracker() {
+	ticker := time.NewTicker(time.Duration(1) * time.Hour)
+	numFound := 0
+	numProcessed := 0
+	for {
+		select {
+		case <-ticker.C:
+			log.Printf(ENDC+"Processed %d comments, found %d matches the last hour", numProcessed, numFound)
+			numFound = 0
+			numProcessed = 0
+		case incr := <-incrCheckedComment:
+			numProcessed += incr
+		case incr := <-incrFoundId:
+			numFound += incr
+		}
+	}
 }
 
 func cleanCheckedComments() {
